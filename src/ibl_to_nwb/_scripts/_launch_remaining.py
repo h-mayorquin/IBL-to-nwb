@@ -104,6 +104,7 @@ kwargs = dict(
     cleanup=False,
     log_to_file=False,
     verify=True,
+    debug=DEBUG,
 )
 
 if DEBUG:  # this is for debugging single sessions
