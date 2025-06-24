@@ -9,7 +9,7 @@ from one.api import ONE
 one = ONE()
 
 # saving bwm_units_df.pqt
-bwm_units_df = bwm_units(one)
+bwm_units_df = bwm_units(one, min_qc=0)
 outpath = Path(__file__).parent.parent / 'fixtures' / 'bwm_units_df.pqt'
 outpath.parent.mkdir(parents=True, exist_ok=True)
 bwm_units_df.to_parquet(outpath)
