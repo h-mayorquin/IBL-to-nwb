@@ -30,16 +30,16 @@ base_path.mkdir(exist_ok=True, parents=True)
 
 REVISION = "2025-05-06"
 N_JOBS = 64
-DEBUG = False
-USE_JOBLIB = True
+DEBUG = True
+USE_JOBLIB = False
 RESET_CACHE = True
 OVERWRITE = True
 
 if DEBUG:
     # eid = "09394481-8dd2-4d5c-9327-f2753ede92d7"  # the spike timestamps issue for Heberto
-    # eid = "6713a4a7-faed-4df2-acab-ee4e63326f8d"  # the LF timestamps issue
+    eid = "6713a4a7-faed-4df2-acab-ee4e63326f8d"  # the LF timestamps issue
     # eid = "d32876dd-8303-4720-8e7e-20678dc2fd71"  # no spikes['clusters'] ????
-    eid = "b81e3e11-9a60-4114-b894-09f85074d9c3" # cluster__uuid / eid issue
+    # eid = "b81e3e11-9a60-4114-b894-09f85074d9c3" # cluster__uuid / eid issue
     N_JOBS = 1
     # crashes locally
 else:
@@ -92,8 +92,8 @@ if RESET_CACHE:
 one = ONE(**one_kwargs)
 
 # %% mode selection
-# mode = "raw"
-mode = "processed"
+mode = "raw"
+# mode = "processed"
 
 # %% the full thing
 kwargs = dict(
@@ -103,7 +103,7 @@ kwargs = dict(
     base_path=base_path,
     cleanup=False,
     log_to_file=False,
-    verify=True,
+    verify=False,
     debug=DEBUG,
     overwrite=OVERWRITE,
 )
