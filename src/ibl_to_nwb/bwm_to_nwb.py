@@ -70,7 +70,7 @@ def setup_paths(one: ONE, eid: str, base_path: Path = None, scratch_path: Path =
         scratch_folder=scratch_path,  # <- this is to be changed to /scratch on the node
     )
     if "USE_SDSC_ONE" in os.environ:
-        paths["scratch_folder"] = (Path("/scratch"),)  # <- on SDSC, a per node /scratch folder exists for this purpose
+        paths["scratch_folder"] = Path("/scratch")  # <- on SDSC, a per node /scratch folder exists for this purpose
     else:
         paths["scratch_folder"] = Path.home() / "ibl_scratch"  # for local usage
 
@@ -175,8 +175,10 @@ def _get_processed_data_interfaces(one: ONE, eid: str, revision: str = None) -> 
     data_interfaces.append(BrainwideMapTrialsInterface(one=one, session=eid, revision=revision))
     data_interfaces.append(WheelInterface(one=one, session=eid, revision=revision))
 
-    # # These interfaces may not be present; check if they are before adding to list
-    pose_estimation_files = one.list_datasets(eid=eid, filename="*.dlc*")
+    # These interfaces may not be present; check if they are before adding to list
+    # pose_estimation_files = one.list_datasets(eid=eid, filename="*.dlc*")
+    # ugly hack, but workaround for one.list_datasets() with revision behavior
+    pose_estimation_files = set([Path(f).name for f in one.list_datasets(eid=eid, filename="*.dlc*")])
     for pose_estimation_file in pose_estimation_files:
         # camera_name = pose_estimation_file.replace("alf/_ibl_", "").replace(".dlc.pqt", "")
         # camera_name = Path(pose_estimation_file).stem.split('_ibl_')[1].split('.')[0]
@@ -328,6 +330,7 @@ def convert_session(
     log_to_file=False,
     debug=False,
     scratch_path=None,
+    overwrite=False,
 ) -> Path:
     """
     Converts a session associated with the given experiment ID (eid) and revision to NWB format.
@@ -412,13 +415,17 @@ def convert_session(
             fname = f"sub-{subject_id}_ses-{eid}_desc-processed_behavior+ecephys.nwb"
 
         case "debug":
+            data_interfaces = []
+            # These interfaces may not be present; check if they are before adding to list
+            pose_estimation_files = set([Path(f).name for f in one.list_datasets(eid=eid, filename="*.dlc*")])
+            for pose_estimation_file in pose_estimation_files:
+                camera_name = get_camera_name_from_file(pose_estimation_file)
+                data_interfaces.append(IblPoseEstimationInterface(one=one, session=eid, camera_name=camera_name, revision=revision))
+
             session_converter = BrainwideMapConverter(
                 one=one,
                 session=eid,
-                data_interfaces=[
-                    IblSortingInterface(one=one, session=eid, revision=revision),
-                ],
-                # data_interfaces=[WheelInterface(one=one, session=eid, revision=revision)],
+                data_interfaces=data_interfaces,
                 verbose=True,
             )
             metadata = session_converter.get_metadata()
@@ -427,6 +434,15 @@ def convert_session(
 
     _logger.info(f"converting: {eid} with mode:{mode} ... ")
     nwbfile_path = paths["output_folder"] / fname
+
+    if nwbfile_path.exists():
+        if overwrite:
+            _logger.warning(f"file: {nwbfile_path} exists already, overwriting")
+            os.remove(nwbfile_path) # for processed. if raw TODO video folder needs to be removed as well
+        else:
+            _logger.error(f"file: {nwbfile_path} exists already, quitting")
+            raise FileExistsError
+
     session_converter.run_conversion(
         nwbfile_path=nwbfile_path,
         metadata=metadata,

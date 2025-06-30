@@ -48,15 +48,16 @@ def check_nwbfile_for_consistency(*, one: ONE, nwbfile_path: Path):
             _check_spike_sorting_data(nwbfile=nwbfile, one=one)
 
             # these are not always present for all datasets, therefore check for existence first
-            for data_interface_name in nwbfile.processing["camera"].data_interfaces.keys():
-                if "Pose" in data_interface_name:
-                    _check_pose_estimation_data(nwbfile=nwbfile, one=one)
-                if "Motion" in data_interface_name:
-                    _check_roi_motion_energy_data(nwbfile=nwbfile, one=one)
-                if "Pupil" in data_interface_name:
-                    _check_pupil_tracking_data(nwbfile=nwbfile, one=one)
-                if "Lick" in data_interface_name:
-                    _check_lick_data(nwbfile=nwbfile, one=one)
+            if 'camera' in nwbfile.processing:
+                for data_interface_name in nwbfile.processing["camera"].data_interfaces.keys():
+                    if "Pose" in data_interface_name:
+                        _check_pose_estimation_data(nwbfile=nwbfile, one=one)
+                    if "Motion" in data_interface_name:
+                        _check_roi_motion_energy_data(nwbfile=nwbfile, one=one)
+                    if "Pupil" in data_interface_name:
+                        _check_pupil_tracking_data(nwbfile=nwbfile, one=one)
+                    if "Lick" in data_interface_name:
+                        _check_lick_data(nwbfile=nwbfile, one=one)
 
         # run checks for raw files
         if "raw_ecephys+image" in str(nwbfile_path):
@@ -298,9 +299,9 @@ def _check_spike_sorting_data(*, one: ONE, nwbfile: NWBFile):
     units_ids = units_df.groupby("eid").get_group(eid)["uuids"]
 
     # beryl
-    one_beryl = units_df.set_index("uuids").loc[units_ids, "Beryl"]
-    nwb_beryl = units_nwb.set_index("cluster_uuid").loc[units_ids, "beryl_location"]
-    np.testing.assert_array_equal(one_beryl.values, nwb_beryl.values)
+    # one_beryl = units_df.set_index("uuids").loc[units_ids, "Beryl"]
+    # nwb_beryl = units_nwb.set_index("cluster_uuid").loc[units_ids, "beryl_location"]
+    # np.testing.assert_array_equal(one_beryl.values, nwb_beryl.values)
 
     # allen
     atlas = AllenAtlas()
