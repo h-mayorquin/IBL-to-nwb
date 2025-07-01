@@ -48,7 +48,7 @@ def check_nwbfile_for_consistency(*, one: ONE, nwbfile_path: Path):
             _check_spike_sorting_data(nwbfile=nwbfile, one=one)
 
             # these are not always present for all datasets, therefore check for existence first
-            if 'camera' in nwbfile.processing:
+            if "camera" in nwbfile.processing:
                 for data_interface_name in nwbfile.processing["camera"].data_interfaces.keys():
                     if "Pose" in data_interface_name:
                         _check_pose_estimation_data(nwbfile=nwbfile, one=one)
@@ -405,7 +405,7 @@ def _check_raw_video_data(*, one: ONE, nwbfile: NWBFile, nwbfile_path: str):
 
     for camera in cameras:
         cam = camera.split("OriginalVideo")[1].lower()
-        dataset = [dataset for dataset in datasets if cam in dataset.lower()]
+        (dataset,) = [dataset for dataset in datasets if cam in dataset.lower() and "timestamps" not in dataset]
         one_video_path = one.load_dataset(eid, dataset)
         with open(one_video_path, "rb") as fH:
             one_video_bytes = fH.read(100)
