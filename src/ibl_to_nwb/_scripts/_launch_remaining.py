@@ -92,8 +92,8 @@ if RESET_CACHE:
 one = ONE(**one_kwargs)
 
 # %% mode selection
-# mode = "raw"
-mode = "processed"
+mode = "raw"
+# mode = "processed"
 
 # %% the full thing
 kwargs = dict(

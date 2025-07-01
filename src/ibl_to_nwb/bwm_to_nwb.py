@@ -257,7 +257,7 @@ def decompress_ephys_cbins(source_folder: Path, target_folder: Path | None = Non
     # target is the folder to compress into
 
     # decompress cbin if necessary
-    cbin_files = source_folder.rglob("*.cbin")
+    cbin_files = list(source_folder.rglob("*.cbin"))
     if len(cbin_files) == 0:
         # TODO should copmlain
         # _logger.critical('no .cbin files found to decompress')
