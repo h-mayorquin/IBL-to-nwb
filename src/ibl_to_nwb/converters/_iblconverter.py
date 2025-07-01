@@ -134,9 +134,9 @@ class IblConverter(ConverterPipe):
             nwbfile_out.add_lab_meta_data(lab_meta_data=ibl_bwm_metadata(**ibl_metadata))
 
             for interface_name, data_interface in self.data_interface_objects.items():
-                data_interface.add_to_nwbfile(
-                    nwbfile=nwbfile_out, metadata=metadata, **conversion_options.get(interface_name, dict())
-                )
+                conversion_options = conversion_options.get(interface_name, dict())
+                data_interface.add_to_nwbfile(nwbfile=nwbfile_out, metadata=metadata, **conversion_options)
+                
 
             if backend_configuration is None:
                 backend_configuration = self.get_default_backend_configuration(nwbfile=nwbfile_out, backend="hdf5")

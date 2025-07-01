@@ -65,7 +65,13 @@ class IblSpikeGlxConverter(SpikeGLXConverterPipe):
                 recording_interface.set_aligned_timestamps(aligned_timestamps=aligned_timestamps)
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata) -> None:
+        
+        # Build conversion options
+        conversion_options = dict()
+        interface_names = list(self.data_interface_objects.keys())
+        non_nidq_interfaces = [name for name in interface_names if name != 'nidq']
+        for interface_name in non_nidq_interfaces:
+            conversion_options[interface_name] = dict(always_write_timestamps=True)
+            
         self.temporally_align_data_interfaces()
-        super().add_to_nwbfile(nwbfile=nwbfile, metadata=metadata)
-
-        # TODO: Add ndx-extracellular-ephys here
+        super().add_to_nwbfile(nwbfile=nwbfile, metadata=metadata, conversion_options=conversion_options)
